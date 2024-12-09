@@ -1,0 +1,64 @@
+Hands-on exercise 6: Building and scanning Docker images
+
+
+Step 1: Build Alpine Image
+In this step, you will pull the Alpine Docker image from Docker Hub. Run the following command in root folder(not the actual root, rather your username folder):
+
+
+docker pull alpine
+
+This will download the Alpine Docker image from Docker Hub.
+
+
+Step 2: Run Clair Server
+Before scanning Docker images with Clair, you need to start the Clair server. You can use Docker to run the Clair server in a container. Run the following commands to start the Clair server:
+
+docker run -p 5433:5432 -d --name db arminc/clair-db:latest
+docker run -p 6060:6060 --link db:postgres -d --name clair arminc/clair-local-scan:latest
+
+This will start the Clair server on port 6060.
+
+
+Step 3: Install Clair-Scanner
+Next, you need to install Clair-scanner on your machine. You can do this by running the following command:
+
+sudo curl -L https://github.com/arminc/clair-scanner/releases/download/v12/clair-scanner_linux_amd64 -o /usr/local/bin/clair-scanner
+sudo chmod +x /usr/local/bin/clair-scanner
+
+This will download and install Clair-scanner on your machine.
+
+
+Step 4: Find Your IP
+You need to find the IP address of your machine to scan Docker images using Clair-scanner. Run the following command to find the docker0 IP address:
+
+ifconfig docker0 | grep inet
+Use inet network IP address.
+
+If the ifconfig command is not found, you can install it with the following command:
+
+sudo apt install net-tools
+
+
+
+
+Step 5: Scan Alpine:latest Image
+Now that you have started the Clair server and installed Clair-scanner, you can scan the Alpine Docker image using Clair-scanner. Run the following command:
+
+clair-scanner --ip <your_ip_address> alpine:latest
+
+Replace <your_ip_address> with the IP address of your machine that you found in the previous step.
+
+This command will scan the Docker image with the name alpine and tag latest. The --ip option specifies the IP address of the machine running the scanner.
+
+
+Step 6: Scan Myapp Image
+In the previous hands-on lab, you built a Docker image named myapp. You can scan this Docker image using Clair-scanner as well. Run the following command:
+
+clair-scanner --ip <your_ip_address> myapp:latest
+
+Replace <your_ip_address> with the IP address of your machine that you found in Step 4.
+This command will scan the myapp Docker image for vulnerabilities.
+
+
+Congratulations!
+You have successfully built and scanned Docker images using Clair scanner!

@@ -1,0 +1,186 @@
+Hands-on exercise 5: Running containers with rootless access
+
+
+Step 1: Create a new user
+While in terminal enter the following
+
+whoami
+sudo adduser appuser
+
+
+This command will create a new user called appuser.
+
+
+Reset the password for current user and switch to the newly created user with the following command in terminal:
+
+
+sudo passwd
+
+sudo su - appuser
+
+
+This command will switch to the appuser account, which we will use to run our containers with rootless access.
+
+
+While in terminal, run the following command:
+
+
+id
+
+
+You should see result similar to this:
+
+
+uid=1001(appuser) gid=1001(appuser) groups=1001(appuser)
+
+
+Step 2: Add non-root user to the docker group
+
+
+The following is considered as the recommended approach to allow your user to run Docker commands without needing sudo.
+
+Here's how you can do it. First, check if your user is already a member of the docker group by running the following command in terminal:
+
+groups
+
+If docker is not in the list, proceed with the following steps.
+
+su – <root_user_name>
+
+Add your user to the docker group using sudo user:
+
+sudo usermod -aG docker appuser
+
+
+Step 3: Create a Dockerfile in a new directory for your app using non-root user
+
+
+Write the following command in your terminal:
+
+sudo su - appuser
+After that create a new directory and navigate to it, using the following command:
+
+mkdir myapp5
+cd myapp5
+
+Create a new file called Dockerfile in terminal using the following command:
+
+nano Dockerfile
+Add the following content in the newly created Dockerfile:
+
+# Use an official Node.js runtime as a parent image
+FROM node:10-alpine
+
+
+# Set the working directory to /app
+WORKDIR /app
+
+
+# Copy the current directory contents into the container at /app
+COPY . /app
+
+# Install any needed packages
+RUN npm install
+
+
+# Add a non-root user to run the app
+RUN addgroup -S appgroup && adduser -S -G appgroup appuser
+
+
+# Set the user to the non-root user
+USER appuser
+
+
+# Make port 8080 available to the world outside this container
+EXPOSE 8080
+
+
+# Define environment variable
+ENV NODE_ENV production
+
+
+# Run the command to start the app
+CMD ["npm", "start"]
+This Dockerfile uses the official Node.js 10 runtime as a base image, sets the working directory to /app, copies the current directory into the container, installs any needed packages, adds a non-root user to run the app, sets the user to the non-root user, exposes port 8080, defines an environment variable, and runs the command to start the app.
+
+
+Step 4: Create a new file called package.json
+
+
+Add the following content into a package.json 0file
+
+
+Using nano create package.json file:
+nano package.json
+
+Fill the newly created file with the following information:
+
+{
+"name": "myapp",
+"version": "1.0.0",
+"description": "My App",
+"main": "index.js",
+"scripts": {
+"start": "node index.js"
+},
+"dependencies": {
+"express": "^4.17.1"
+}
+}
+
+
+This package.json file defines the name, version, description, main file, scripts, and dependencies for your app. In this example, we are using the Express web framework.
+
+
+Step 5: Create a new file called index.js
+
+
+
+
+Using nano create index.js file:
+nano index.js
+
+Fill the newly created file with the following information:
+
+const express = require('express')
+const app = express()
+
+app.get('/', (req, res) => {
+res.send('Hello World!')
+})
+
+app.listen(8080, () => {
+console.log('App listening on port 8080')
+})
+This index.js file creates a new Express app that listens on port 8080 and returns a "Hello World!" message for the root route.
+
+
+Step 6: Build Docker image
+Build a Docker image with the tag myappimage5 using the Dockerfile in the current directory by running a following command
+
+docker build -t myappimage5 .
+
+
+Step 7: Run Docker container
+
+
+Run the Docker container with port 8080 mapped to the host and uses the myappimage5 image.
+
+docker run -d -p 8085:8080 --name myapp5 myappimage5
+
+
+Now you have a Docker container running your app with a non-root user. You can access the app by running:
+
+
+curl http://localhost:8085
+
+
+Verify that the container is running with rootless access by running the following command inside the container:   
+
+
+docker exec -it myapp5 sh
+
+id  
+
+
+This command will display the user and group IDs of the current user, which should be non-root.

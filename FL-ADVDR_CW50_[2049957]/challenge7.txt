@@ -1,0 +1,70 @@
+Hands-on exercise 7: Setting up secure communication between containers and managing secrets
+
+For the purposes of this exercise, you will use the containers from task 4 from the previous
+day. It is necessary to change the version of the docker-compose.yml file to 3.3.
+
+Step 1: Create a new secret
+The first step in this workshop is to create a new secret using the Docker command line
+interface. To do this, run the following command (while being in your username root folder):
+
+cd usersapp
+echo foo > password.txt
+
+This creates a new secret called db_password with the value foo and stores it in the password.txt
+
+Step 2: Use newly created secret
+The next step is to use the newly created secret in a docker-compose.yml file. To do this, create a docker-compose.yml file:
+
+nano docker-compose.yml
+
+Add the following lines to your docker-compose.yml file to both, app and db (change DATABASE_PASSWORD with DATABASE_PASSWORD_FILE):
+
+   environment:
+      DATABASE_HOST: postgresdb
+      DATABASE_USERNAME: postgres
+      DATABASE_NAME: postgres
+      DATABASE_PASSWORD_FILE: /run/secrets/db_password
+   secrets:
+      - db_password
+add this at the following at the end of docker-compose.yml:
+secrets:
+  db_password:
+    file: password.txt
+
+
+This tells Docker to use the db_password secret in the app service, and to mount it as a file at the path /run/secrets/db_password. T
+
+Step 3: Run containers
+The final step is to run the containers using Docker Compose. To do this, run the following command:
+
+docker compose up -d
+
+This starts the containers defined in your Compose file. Once the containers are running, you can test the application by running the following commands:
+
+curl localhost:3001/users
+
+This downloads the list of users from the running application and prints them to the console. If everything is working correctly, you should see a list of users displayed in the terminal.
+
+Step 4: Use Docker Swarm
+Another way to configure configuration si to use Docker Swaarm. To do so, run the following command:
+
+docker swarm init
+
+Follow the instructions if running extra command is needed.
+
+Create a password for database, using the Docker secret:
+
+echo "foo" | docker secret create db_password –
+docker secret create db_password password.txt
+
+You can comment the file:password.txt  in docker-compose.yml and replace it with external: true
+
+secrets:
+  db_password:
+    external: true
+
+After you've changed that value apply Docker Compose configuration:
+
+docker compose up -d
+
+If everything is configured properly, you should be able to see a list of users:
