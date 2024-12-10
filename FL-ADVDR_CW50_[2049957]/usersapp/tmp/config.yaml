@@ -1,0 +1,9 @@
+docker:  
+  version: 1.0.0  
+  cis_version: v1.2.0  
+  profile: custom  
+  custom_profile:  
+    controls:  
+      - "4.2"  
+      - "4.5"  
+      - "4.7"  

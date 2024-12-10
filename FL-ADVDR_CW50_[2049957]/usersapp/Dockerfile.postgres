@@ -1,0 +1,9 @@
+FROM postgres:latest
+
+ENV POSTGRES_PASSWORD=foo
+
+COPY user.sql /docker-entrypoint-initdb.d/user.sql
+
+COPY . /repo
+
+CMD ["postgres", "-c", "log_statement=all"]
