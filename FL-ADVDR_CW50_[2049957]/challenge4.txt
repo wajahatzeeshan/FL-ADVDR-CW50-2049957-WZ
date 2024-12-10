@@ -6,6 +6,9 @@ Step 1: Download app code
 While in the root folder download the following application code by typing the following commands in terminal:
 
 wget https://openaihack.blob.core.windows.net/adv-docker-course-files/usersapp.zip
+OR
+curl -o usersapp.zip https://openaihack.blob.core.windows.net/adv-docker-course-files/usersapp.zip
+
 unzip -d usersapp usersapp.zip
 cd usersapp
 
